@@ -174,7 +174,7 @@ namespace launcher_utils::jni {
 	 * The returned local ref is not automatically freed.
 	 * (The garbage collector should do this, if not explicitly done.)
 	 */
-	LocalRef toJavaArray(JNIEnv* env, std::span<long> arr);
+	LocalRef toJavaArray(JNIEnv* env, std::span<std::int64_t> arr);
 
 	/**
 	 * Converts a Java integer array into an int vector.

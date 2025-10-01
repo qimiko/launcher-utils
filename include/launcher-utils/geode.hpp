@@ -117,7 +117,7 @@ namespace launcher_utils {
 			return jni::callStaticMethod<int>("com/geode/launcher/utils/GeodeUtils", "getDeviceHapticsCount", "(I)I", m_deviceId).unwrapOrDefault();
 		}
 
-		geode::Result<> vibrateDevice(long durationMs, int intensity, int motorIdx = -1) {
+		geode::Result<> vibrateDevice(std::int64_t durationMs, int intensity, int motorIdx = -1) {
 			GEODE_UNWRAP_INTO(auto r, jni::callStaticMethod<bool>("com/geode/launcher/utils/GeodeUtils", "vibrateDevice", "(IJII)Z", m_deviceId, durationMs, intensity, motorIdx));
 			if (!r) {
 				return geode::Err("call failed");
@@ -143,7 +143,7 @@ namespace launcher_utils {
 	geode::Result<std::vector<int>> getConnectedDevices();
 
 	geode::Result<bool> vibrateSupported();
-	geode::Result<> vibrate(long ms);
-	geode::Result<> vibratePattern(std::span<long> pattern, int repeat);
+	geode::Result<> vibrate(std::int64_t ms);
+	geode::Result<> vibratePattern(std::span<std::int64_t> pattern, int repeat);
 };
 

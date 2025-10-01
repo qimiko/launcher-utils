@@ -106,7 +106,7 @@ geode::Result<jni::MethodInfo&> jni::getMethodInfo(JNIEnv* env, const char* clas
 	).first->second);
 }
 
-jni::LocalRef jni::toJavaArray(JNIEnv* env, std::span<long> arr) {
+jni::LocalRef jni::toJavaArray(JNIEnv* env, std::span<std::int64_t> arr) {
 	auto ptr = env->NewLongArray(arr.size());
 	env->SetLongArrayRegion(ptr, 0, arr.size(), arr.data());
 
@@ -159,11 +159,11 @@ geode::Result<bool> launcher_utils::vibrateSupported() {
 	return jni::callStaticMethod<bool>("com/geode/launcher/utils/GeodeUtils", "vibrateSupported", "()Z");
 }
 
-geode::Result<> launcher_utils::vibrate(long ms) {
+geode::Result<> launcher_utils::vibrate(std::int64_t ms) {
 	return jni::callStaticMethod<void>("com/geode/launcher/utils/GeodeUtils", "vibrate", "(J)V", ms);
 }
 
-geode::Result<> launcher_utils::vibratePattern(std::span<long> pattern, int repeat) {
+geode::Result<> launcher_utils::vibratePattern(std::span<std::int64_t> pattern, int repeat) {
 	GEODE_UNWRAP_INTO(auto env, jni::getEnv());
 
 	auto arr = jni::toJavaArray(env, pattern);
