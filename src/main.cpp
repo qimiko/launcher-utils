@@ -124,7 +124,7 @@ geode::Result<std::vector<int>> jni::extractArray(JNIEnv* env, jintArray array) 
 	return geode::Ok(r);
 }
 
-geode::Result<std::string> jni::convertString(JNIEnv* env, jstring string) {
+geode::Result<std::string> jni::toString(JNIEnv* env, jstring string) {
 	if (!string) {
 		return geode::Err("convertString: null string");
 	}
@@ -145,6 +145,20 @@ geode::Result<std::string> jni::convertString(JNIEnv* env, jstring string) {
 	env->ReleaseStringChars(string, chars);
 
 	return r;
+}
+
+geode::Result<jni::LocalRef> jni::toJString(JNIEnv* env, std::string_view string) {
+	GEODE_UNWRAP_INTO(auto wString, geode::utils::string::utf8ToUtf16(string));
+
+	auto jString = env->NewString(
+		reinterpret_cast<const jchar*>(wString.data()),
+		wString.size()
+	);
+	if (!jString) {
+		return geode::Err("toJavaString: NewString returned null");
+	}
+
+	return geode::Ok(LocalRef(jString));
 }
 
 geode::Result<int> launcher_utils::getConnectedControllerCount() {

@@ -181,7 +181,9 @@ namespace launcher_utils::jni {
 	 */
 	geode::Result<std::vector<int>> extractArray(JNIEnv* env, jintArray array);
 
-	geode::Result<std::string> convertString(JNIEnv* env, jstring string);
+	geode::Result<std::string> toString(JNIEnv* env, jstring string);
+
+	geode::Result<LocalRef> toJString(JNIEnv* env, std::string_view string);
 
 	template <typename T, typename... Args> requires std::same_as<T, void>
 	geode::Result<> performStaticMethodCall(JNIEnv* env, MethodInfo& info, Args... args) {
@@ -250,7 +252,7 @@ namespace launcher_utils::jni {
 	template <typename T, typename... Args> requires std::same_as<T, std::string>
 	geode::Result<std::string> performMethodCall(JNIEnv* env, MethodInfo& info, jobject obj, Args... args) {
 		auto s = LocalRef(env->CallObjectMethod(obj, info.methodID(), args...));
-		return convertString(env, s.get<jstring>());
+		return toString(env, s.get<jstring>());
 	}
 
 	template <typename T, typename... Args> requires std::same_as<T, int>
