@@ -1,0 +1,11 @@
+{
+	"geode": "4.8.0",
+	"gd": {
+		"android": "2.2074"
+	},
+	"id": "zmx.jni-test",
+	"name": "jni-test",
+	"version": "v1.0.0",
+	"developer": "zmx",
+	"description": ""
+}
