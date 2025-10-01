@@ -221,6 +221,14 @@ namespace launcher_utils::jni {
 			return extractArray(env, array.get<jintArray>());
 	}
 
+	template <typename T, typename... Args> requires std::same_as<T, std::string>
+	geode::Result<std::string> performStaticMethodCall(JNIEnv* env, MethodInfo& info, Args... args) {
+		auto s = LocalRef(env->CallStaticObjectMethod(info.classID(), info.methodID(), args...));
+		GEODE_UNWRAP(checkForExceptions(env));
+
+		return toString(env, s.get<jstring>());
+	}
+
 	template <typename T, typename... Args> requires std::same_as<T, jobject>
 	geode::Result<LocalRef> performStaticMethodCall(JNIEnv* env, MethodInfo& info, Args... args) {
 		auto r = LocalRef(env->CallStaticObjectMethod(info.classID(), info.methodID(), args...));
@@ -252,12 +260,17 @@ namespace launcher_utils::jni {
 	template <typename T, typename... Args> requires std::same_as<T, std::string>
 	geode::Result<std::string> performMethodCall(JNIEnv* env, MethodInfo& info, jobject obj, Args... args) {
 		auto s = LocalRef(env->CallObjectMethod(obj, info.methodID(), args...));
+		GEODE_UNWRAP(checkForExceptions(env));
+
 		return toString(env, s.get<jstring>());
 	}
 
 	template <typename T, typename... Args> requires std::same_as<T, int>
 	geode::Result<int> performMethodCall(JNIEnv* env, MethodInfo& info, jobject obj, Args... args) {
-		return geode::Ok(env->CallIntMethod(obj, info.methodID(), args...));
+		auto r = env->CallIntMethod(obj, info.methodID(), args...);
+		GEODE_UNWRAP(checkForExceptions(env));
+
+		return geode::Ok(r);
 	}
 
 	/**
