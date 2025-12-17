@@ -113,15 +113,51 @@ jni::LocalRef jni::toJavaArray(JNIEnv* env, std::span<std::int64_t> arr) {
 	return LocalRef(ptr);
 }
 
-geode::Result<std::vector<int>> jni::extractArray(JNIEnv* env, jintArray array) {
-	if (array == nullptr) {
-		return geode::Err("extractArray: null array");
-	}
+namespace {
+	template <auto T, typename U, typename V>
+	inline geode::Result<std::vector<U>> extractArrayInner(JNIEnv* env, V array) {
+		if (array == nullptr) {
+			return geode::Err("extractArray: null array");
+		}
 
-	auto len = env->GetArrayLength(array);
-	std::vector<int> r(len);
-	env->GetIntArrayRegion(array, 0, len, r.data());
-	return geode::Ok(r);
+		auto len = env->GetArrayLength(array);
+		std::vector<U> r(len);
+		(env->*T)(array, 0, len, r.data());
+		return geode::Ok(r);
+	}
+}
+
+geode::Result<std::vector<int>> jni::extractArray(JNIEnv* env, jintArray array) {
+	return extractArrayInner<&JNIEnv::GetIntArrayRegion, int>(env, array);
+}
+
+geode::Result<std::vector<float>> jni::extractArray(JNIEnv* env, jfloatArray array) {
+	return extractArrayInner<&JNIEnv::GetFloatArrayRegion, float>(env, array);
+}
+
+geode::Result<std::vector<std::int64_t>> jni::extractArray(JNIEnv* env, jlongArray array) {
+	return extractArrayInner<&JNIEnv::GetLongArrayRegion, std::int64_t>(env, array);
+}
+
+geode::Result<std::vector<double>> jni::extractArray(JNIEnv* env, jdoubleArray array) {
+	return extractArrayInner<&JNIEnv::GetDoubleArrayRegion, double>(env, array);
+}
+
+geode::Result<std::vector<std::int16_t>> jni::extractArray(JNIEnv* env, jshortArray array) {
+	return extractArrayInner<&JNIEnv::GetShortArrayRegion, std::int16_t>(env, array);
+}
+
+geode::Result<std::vector<bool>> jni::extractArray(JNIEnv* env, jbooleanArray array) {
+	// copy into a uint8 vector for c-array behavior, then copy into a proper boolean vector
+	GEODE_UNWRAP_INTO(auto cArr, extractArrayInner<&JNIEnv::GetBooleanArrayRegion, std::uint8_t>(env, array));
+	std::vector<bool> boolArr{cArr.begin(), cArr.end()};
+	return geode::Ok(boolArr);
+}
+
+geode::Result<std::vector<char16_t>> extractArray(JNIEnv* env, jcharArray array) {
+	GEODE_UNWRAP_INTO(auto cArr, extractArrayInner<&JNIEnv::GetCharArrayRegion, std::uint16_t>(env, array));
+	std::vector<char16_t> boolArr{cArr.begin(), cArr.end()};
+	return geode::Ok(boolArr);
 }
 
 geode::Result<std::string> jni::toString(JNIEnv* env, jstring string) {

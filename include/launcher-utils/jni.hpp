@@ -180,6 +180,12 @@ namespace launcher_utils::jni {
 	 * Converts a Java integer array into an int vector.
 	 */
 	geode::Result<std::vector<int>> extractArray(JNIEnv* env, jintArray array);
+	geode::Result<std::vector<float>> extractArray(JNIEnv* env, jfloatArray array);
+	geode::Result<std::vector<std::int64_t>> extractArray(JNIEnv* env, jlongArray array);
+	geode::Result<std::vector<double>> extractArray(JNIEnv* env, jdoubleArray array);
+	geode::Result<std::vector<std::int16_t>> extractArray(JNIEnv* env, jshortArray array);
+	geode::Result<std::vector<bool>> extractArray(JNIEnv* env, jbooleanArray array);
+	geode::Result<std::vector<char16_t>> extractArray(JNIEnv* env, jcharArray array);
 
 	geode::Result<std::string> toString(JNIEnv* env, jstring string);
 
