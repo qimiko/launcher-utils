@@ -561,12 +561,24 @@ lights={} ({}) motors={})*",
 		addLogLine("menu clicked");
 	}
 
-	void preKeyInput(AndroidInputDeviceInfoEvent* event) {
+	void joysticksUpdate(AndroidJoystickInput::Data& event) {
+		m_joystickLeft->setJoystickPosition({event.leftX, -event.leftY});
+		m_joystickRight->setJoystickPosition({event.rightX, -event.rightY});
+		m_joystickHat->setJoystickPosition({event.hatX, -event.hatY});
+
+		m_triggerLeft->setTriggerPosition(event.leftTrigger);
+		m_triggerRight->setTriggerPosition(event.rightTrigger);
+	}
+
+	void preKeyInput(AndroidRichInputEvent* event) {
+		auto data = event->data();
+
 		if (m_page == 0) {
 			auto msg = fmt::format(
-				"pre input from device={} src={}",
+				"pre input from device={} src={} eventType={}",
 				event->deviceId(),
-				source_name(static_cast<launcher_utils::InputDevice::Source>(event->eventSource()))
+				source_name(static_cast<launcher_utils::InputDevice::Source>(event->eventSource())),
+				data.index()
 			);
 			addLogLine(msg);
 		}
@@ -580,11 +592,18 @@ lights={} ({}) motors={})*",
 		} else {
 			m_nextInputController = false;
 		}
+
+		if (auto joystickData = std::get_if<AndroidJoystickInput>(&data)) {
+			auto packets = joystickData->packets();
+			if (!packets.empty()) {
+				joysticksUpdate(packets.back());
+			}
+		}
 	}
 
-	EventListener<AndroidInputDeviceInfoFilter> m_listener{
+	EventListener<AndroidRichInputFilter> m_listener{
 		this, &ControllerTestLayer::preKeyInput,
-		geode::AndroidInputDeviceInfoFilter()
+		geode::AndroidRichInputFilter()
 	};
 
 	void devicesChanged(AndroidInputDeviceEvent* event) {
@@ -606,47 +625,6 @@ lights={} ({}) motors={})*",
 	EventListener<geode::AndroidInputDeviceFilter> m_inputChangeListener{
 		this, &ControllerTestLayer::devicesChanged,
 		geode::AndroidInputDeviceFilter()
-	};
-
-	void joysticksUpdate(AndroidInputJoystickEvent* event) {
-		auto leftJoystickX = event->leftX();
-		auto leftJoystickY = event->leftY();
-
-		if (!leftJoystickX.empty() && !leftJoystickY.empty()) {
-			cocos2d::CCPoint pos{leftJoystickX.back(), -leftJoystickY.back()};
-			m_joystickLeft->setJoystickPosition(pos);
-		}
-
-		auto rightJoystickX = event->rightX();
-		auto rightJoystickY = event->rightY();
-
-		if (!rightJoystickX.empty() && !rightJoystickY.empty()) {
-			cocos2d::CCPoint pos{rightJoystickX.back(), -rightJoystickY.back()};
-			m_joystickRight->setJoystickPosition(pos);
-		}
-
-		auto hatJoystickX = event->hatX();
-		auto hatJoystickY = event->hatY();
-
-		if (!hatJoystickX.empty() && !hatJoystickY.empty()) {
-			cocos2d::CCPoint pos{hatJoystickX.back(), -hatJoystickY.back()};
-			m_joystickHat->setJoystickPosition(pos);
-		}
-
-		auto triggerLeft = event->leftTrigger();
-		if (!triggerLeft.empty()) {
-			m_triggerLeft->setTriggerPosition(triggerLeft.back());
-		}
-
-		auto triggerRight = event->rightTrigger();
-		if (!triggerRight.empty()) {
-			m_triggerRight->setTriggerPosition(triggerRight.back());
-		}
-	}
-
-	EventListener<geode::AndroidInputJoystickFilter> m_joystickUpdateListener{
-		this, &ControllerTestLayer::joysticksUpdate,
-		geode::AndroidInputJoystickFilter()
 	};
 
 public:
