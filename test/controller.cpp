@@ -382,14 +382,16 @@ class ControllerTestLayer : public BaseTestLayer {
 
 		auto deviceId = inputDevice.getDeviceId();
 
-		auto msg = fmt::format(R"*(# Device Info (#{})
+		auto controllerNumber = inputDevice.getControllerNumber();
+
+		auto msg = fmt::format(R"*(# Device Info (#{}, {})
 name={}  
 descriptor={}  
 product={:#x}, vendor={:#x}  
 {}  
 sources={}  
 lights={} ({}) motors={})*",
-			deviceId,
+			deviceId, controllerNumber,
 			name,
 			descriptor,
 			productId, vendorId,

@@ -34,6 +34,10 @@ namespace launcher_utils {
 			return jni::callMethod<std::string>("android/view/InputDevice", "getName", "()Ljava/lang/String;", *m_inputDevice).unwrapOrDefault();
 		}
 
+		int getControllerNumber() {
+			return jni::callMethod<int>("android/view/InputDevice", "getControllerNumber", "()I", *m_inputDevice).unwrapOrDefault();
+		}
+
 		int getVendorId() {
 			return jni::callMethod<int>("android/view/InputDevice", "getVendorId", "()I", *m_inputDevice).unwrapOrDefault();
 		}
